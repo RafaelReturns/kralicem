@@ -423,25 +423,39 @@
         /***********************************************************
          * BOOT SEQUENCE, ERROR HANDLING & MUSIC POPUP
          ***********************************************************/
-        window.onload = async () => {
-            try { await document.fonts.ready; } catch(e) {}
-            resizeGlobals();
-            
-            const loader = document.getElementById('loader');
-            
-            // XƏTA YOXLANMASI: GSAP fail safe
-            if (typeof gsap === 'undefined') {
+       document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader');
+    const loaderError = document.getElementById('loader-error');
+    const loaderText = document.getElementById('loader-text');
+
+    try {
+        resizeGlobals();
+
+        if (typeof gsap === 'undefined') {
+            loaderText.textContent = 'XƏTA BAŞ VERDİ';
+            loaderError.textContent =
+                'GSAP yüklənmədi. Kitabxananın bağlantısını yoxla.';
+            loaderError.style.display = 'block';
+            return;
+        }
+
+        gsap.to(loader, {
+            opacity: 0,
+            duration: 1.5,
+            onComplete: () => {
                 loader.style.display = 'none';
                 document.getElementById('musicPopup').style.display = 'flex';
                 masterState = 'MUSIC_POPUP';
-            } else {
-                gsap.to(loader, { opacity: 0, duration: 1.5, onComplete: () => {
-                    loader.style.display = 'none';
-                    document.getElementById('musicPopup').style.display = 'flex';
-                    masterState = 'MUSIC_POPUP';
-                }});
             }
-        };
+        });
+    } catch (error) {
+        console.error('Başlanğıc xətası:', error);
+        loaderText.textContent = 'XƏTA BAŞ VERDİ';
+        loaderError.textContent =
+            'Sayt başladılarkən xəta baş verdi. Brauzerin Console bölməsini yoxla.';
+        loaderError.style.display = 'block';
+    }
+});
 
         let musicSelected = false;
         document.getElementById('btnMusic').addEventListener('pointerdown', (e) => {
